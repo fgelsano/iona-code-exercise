@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Button, Card, Col, Container, Row, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { BreedContext } from "../../context/BreedContext";
@@ -13,25 +13,29 @@ const HomeComponent = () => {
   const [addMore, setAddMore] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (breed.length > 1) {
+      fetchBreeds({ breed_id: breed[1] });
+    }
+  }, [breed]);
+
   const handleSelectBreed = async (e) => {
     await setSelectedBreedData([]);
     setSelectedBreed(e.target.value);
-    const selectedBreedName = breedContext.breeds.filter(
-      (breed) => breed.name === e.target.value
+    fetchBreeds({ breed_id: e.target.value });
+  };
+
+  const getSelectedBreed = () => {
+    const item = breedContext.breeds.filter(
+      (item) => item.id === selectedBreed
     );
-    if (selectedBreedName.length > 0) {
-      fetchBreeds({ breed_id: selectedBreedName[0].id });
-    }
+
+    return (item[0] && item[0].name) || "";
   };
 
   const handleClickMore = () => {
     setPage(page + 1);
-    const selectedBreedName = breedContext.breeds.filter(
-      (breed) => breed.name === selectedBreed
-    );
-    if (selectedBreedName.length > 0) {
-      fetchBreeds({ page: page + 1, breed_id: selectedBreedName[0].id });
-    }
+    fetchBreeds({ page: page + 1, breed_id: selectedBreed });
   };
   const fetchBreeds = (values = {}) => {
     setAddMore(false);
@@ -81,7 +85,8 @@ const HomeComponent = () => {
                 <Form.Select
                   id="breedSelector"
                   onChange={handleSelectBreed}
-                  value={selectedBreed}
+                  defaultValue={selectedBreed}
+                  //   value={selectedBreed}
                 >
                   <option value="" disabled>
                     Select a Breed
@@ -101,9 +106,7 @@ const HomeComponent = () => {
                   <span>
                     <strong>
                       {" "}
-                      {selectedBreed
-                        ? selectedBreed
-                        : "Nothing at the moment..."}
+                      {getSelectedBreed() || "Nothing at the moment..."}
                     </strong>
                   </span>
                 </Form.Label>
