@@ -1,25 +1,32 @@
-import logo from './logo.svg';
-import './App.css';
-import Blank from './';
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { Routes, BrowserRouter, Route } from "react-router-dom";
+import HomeComponent from '../src/pages/home/HomeComponent';
+import SingleComponent from '../src/pages/single/SingleComponent';
+import {BreedContext} from './context/BreedContext';
 
 function App() {
+  const [breeds,setBreeds] = useState([]);
+  const breedsSetter = (values) =>{
+    setBreeds(values);
+  }
+  useEffect(()=>{
+    fetchBreed();
+  },[]);
+  const fetchBreed = () => {
+    axios.get("https://api.thecatapi.com/v1/breeds").then((response) => {
+      breedsSetter(response.data);
+    });
+  };
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BreedContext.Provider value={{breeds}}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<HomeComponent/>} />
+          <Route path="/kitty/:id" element={<SingleComponent/>} />
+        </Routes>
+      </BrowserRouter>
+    </BreedContext.Provider>
   );
 }
 
